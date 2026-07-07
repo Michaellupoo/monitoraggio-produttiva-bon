@@ -35,7 +35,7 @@ const machines = [
     serial: "1000081362",
     customerName: "Biesse SPA Xylexpo",
     country: "IT",
-    type: "Preserie",
+    type: "Tubo",
     bon: "1.5.0.171",
     bSuite: "5.0.0.359",
     plc: "16.3.7.51",
@@ -54,6 +54,19 @@ const machines = [
     plc: "16.3.7.50",
     wrt: "PL533",
     status: "Completata",
+  },
+  {
+    line: "AK02",
+    name: "Rover Multi Up M G 1532",
+    serial: "1000081307",
+    customerName: "Fabbro Arredi",
+    country: "IT",
+    type: "Preserie",
+    bon: "1.5.0.304",
+    bSuite: "5.0.0.359",
+    plc: "17.0.1.53",
+    wrt: "PL53",
+    status: "In Corso",
   },
   {
     line: "AK03",
@@ -75,11 +88,11 @@ const machines = [
     customerName: "Farnazzo Mobili SNC",
     country: "IT",
     type: "Preserie",
-    bon: "1.5.0.213",
+    bon: "1.5.0.240",
     bSuite: "5.0.0.359",
     plc: "16.3.7.51",
     wrt: "PL547",
-    status: "In Corso",
+    status: "Completata",
   },
   {
     line: "AK03",
@@ -88,28 +101,44 @@ const machines = [
     customerName: "Outline Vinduer A/S",
     country: "DK",
     type: "Tubo",
-    bon: "1.5.0.173",
+    bon: "1.5.0.213",
     bSuite: "5.0.0.359",
     plc: "16.3.7.51",
     wrt: "PL547",
-    status: "In Corso",
+    status: "Completata",
+  },
+  {
+    line: "AK03",
+    name: "Rover Multi Pro M G 1667",
+    serial: "1000082270",
+    customerName: "Barberini Allestimenti",
+    country: "IT",
+    type: "Preserie",
+    bon: "1.4.1.113",
+    bSuite: "5.0.0.359",
+    plc: "17.0.1.53",
+    wrt: "PL53",
+    status: "Completata",
   },
 ];
 
 const lineMeta = {
   AK01: {
+    color: "blue",
     card: "from-blue-50 to-white border-blue-100",
     icon: "from-blue-600 to-blue-500",
     chip: "bg-blue-100 text-blue-700",
     text: "text-blue-700",
   },
   AK02: {
+    color: "green",
     card: "from-emerald-50 to-white border-emerald-100",
     icon: "from-emerald-600 to-emerald-500",
     chip: "bg-emerald-100 text-emerald-700",
     text: "text-emerald-700",
   },
   AK03: {
+    color: "purple",
     card: "from-violet-50 to-white border-violet-100",
     icon: "from-violet-700 to-violet-500",
     chip: "bg-violet-100 text-violet-700",
@@ -155,12 +184,7 @@ function StatDot({ status, value }) {
   return (
     <div className="flex items-center justify-between gap-3 text-sm text-slate-600">
       <span className="flex items-center gap-2">
-        <span
-          className={classNames(
-            "h-2.5 w-2.5 rounded-full",
-            statusStyle[status].dot
-          )}
-        />
+        <span className={classNames("h-2.5 w-2.5 rounded-full", statusStyle[status].dot)} />
         {status}
       </span>
       <span className="font-semibold tabular-nums text-slate-700">{value}</span>
@@ -171,13 +195,9 @@ function StatDot({ status, value }) {
 function SelectBox({ icon: Icon, label, value, onChange, children }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-semibold text-slate-600">
-        {label}
-      </span>
-
+      <span className="mb-2 block text-sm font-semibold text-slate-600">{label}</span>
       <div className="relative">
         <Icon className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-
         <select
           value={value}
           onChange={(event) => onChange(event.target.value)}
@@ -185,7 +205,6 @@ function SelectBox({ icon: Icon, label, value, onChange, children }) {
         >
           {children}
         </select>
-
         <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
       </div>
     </label>
@@ -196,12 +215,7 @@ function StatusBadge({ status }) {
   const Icon = statusStyle[status].icon;
 
   return (
-    <span
-      className={classNames(
-        "inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-bold",
-        statusStyle[status].badge
-      )}
-    >
+    <span className={classNames("inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-bold", statusStyle[status].badge)}>
       <Icon className="h-3.5 w-3.5" />
       {status}
     </span>
@@ -243,35 +257,26 @@ function Flag({ country }) {
     );
   }
 
-  return (
-    <span className="inline-block h-4 w-6 shrink-0 rounded-[3px] border border-slate-200 bg-slate-100 shadow-sm" />
-  );
+  return <span className="inline-block h-4 w-6 shrink-0 rounded-[3px] border border-slate-200 bg-slate-100 shadow-sm" />;
 }
 
-export default function App() {
+export default function MonitorVersionamenti() {
   const [query, setQuery] = useState("");
   const [line, setLine] = useState("Tutte le linee");
   const [status, setStatus] = useState("Tutti gli stati");
   const [sort, setSort] = useState({ key: "line", direction: "asc" });
 
-  const lines = useMemo(
-    () => [...new Set(machines.map((machine) => machine.line))],
-    []
-  );
-
+  const lines = useMemo(() => [...new Set(machines.map((machine) => machine.line))], []);
   const statuses = ["Completata", "In Corso", "Non nota"];
 
   const lineStats = useMemo(() => {
     return lines.map((item) => {
       const list = machines.filter((machine) => machine.line === item);
-
       return {
         line: item,
         total: list.length,
-        completed: list.filter((machine) => machine.status === "Completata")
-          .length,
-        inProgress: list.filter((machine) => machine.status === "In Corso")
-          .length,
+        completed: list.filter((machine) => machine.status === "Completata").length,
+        inProgress: list.filter((machine) => machine.status === "In Corso").length,
         unknown: list.filter((machine) => machine.status === "Non nota").length,
       };
     });
@@ -284,13 +289,9 @@ export default function App() {
       .filter((machine) => {
         const matchesQuery = !normalizedQuery
           ? true
-          : Object.values(machine).some((value) =>
-              String(value).toLowerCase().includes(normalizedQuery)
-            );
-
+          : Object.values(machine).some((value) => String(value).toLowerCase().includes(normalizedQuery));
         const matchesLine = line === "Tutte le linee" || machine.line === line;
-        const matchesStatus =
-          status === "Tutti gli stati" || machine.status === status;
+        const matchesStatus = status === "Tutti gli stati" || machine.status === status;
 
         return matchesQuery && matchesLine && matchesStatus;
       })
@@ -298,7 +299,6 @@ export default function App() {
         const first = String(a[sort.key] ?? "").toLowerCase();
         const second = String(b[sort.key] ?? "").toLowerCase();
         const result = first.localeCompare(second, "it", { numeric: true });
-
         return sort.direction === "asc" ? result : -result;
       });
   }, [query, line, status, sort]);
@@ -306,10 +306,8 @@ export default function App() {
   const totals = useMemo(() => {
     return {
       machines: machines.length,
-      completed: machines.filter((machine) => machine.status === "Completata")
-        .length,
-      inProgress: machines.filter((machine) => machine.status === "In Corso")
-        .length,
+      completed: machines.filter((machine) => machine.status === "Completata").length,
+      inProgress: machines.filter((machine) => machine.status === "In Corso").length,
     };
   }, []);
 
@@ -324,31 +322,23 @@ export default function App() {
   function handleSort(key) {
     setSort((current) => ({
       key,
-      direction:
-        current.key === key && current.direction === "asc" ? "desc" : "asc",
+      direction: current.key === key && current.direction === "asc" ? "desc" : "asc",
     }));
   }
 
   function exportCsv() {
     const headers = columns.map((column) => column.label);
-    const rows = filteredMachines.map((machine) =>
-      columns.map((column) => machine[column.key])
-    );
-
+    const rows = filteredMachines.map((machine) => columns.map((column) => machine[column.key]));
     const csv = [headers, ...rows]
-      .map((row) =>
-        row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(";")
-      )
+      .map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(";"))
       .join("\n");
 
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-
     link.href = url;
     link.download = "monitor-versionamenti.csv";
     link.click();
-
     URL.revokeObjectURL(url);
   }
 
@@ -358,14 +348,9 @@ export default function App() {
         <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 px-5 py-5 backdrop-blur-xl md:px-8 lg:px-10">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-2xl font-black tracking-tight text-slate-950">
-                Monitoraggio Produttiva con B/0n
-              </h1>
-              <p className="mt-1 text-sm font-semibold text-slate-500">
-                Stato di avanzamento linea
-              </p>
+              <h1 className="text-2xl font-black tracking-tight text-slate-950">Monitoraggio Produttiva con B/0n</h1>
+              <p className="mt-1 text-sm font-semibold text-slate-500">Stato di avanzamento linea</p>
             </div>
-
             <div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
               <RefreshCw className="h-4 w-4" />
               Ultimo aggiornamento: {lastUpdated}
@@ -373,20 +358,18 @@ export default function App() {
           </div>
         </header>
 
-        <section
-          id="dashboard"
-          className="w-full space-y-6 px-4 py-6 md:px-6 lg:px-8"
-        >
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/60">
+        <section id="dashboard" className="w-full space-y-6 px-4 py-6 md:px-6 lg:px-8">
+          <div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35 }}
+            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/60"
+          >
             <div className="grid gap-4 xl:grid-cols-[1.8fr_1fr_1fr_auto] xl:items-end">
               <label className="block">
-                <span className="mb-2 block text-sm font-semibold text-slate-600">
-                  Ricerca
-                </span>
-
+                <span className="mb-2 block text-sm font-semibold text-slate-600">Ricerca</span>
                 <div className="relative">
                   <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-
                   <input
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
@@ -396,24 +379,14 @@ export default function App() {
                 </div>
               </label>
 
-              <SelectBox
-                icon={ListFilter}
-                label="Filtra per linea"
-                value={line}
-                onChange={setLine}
-              >
+              <SelectBox icon={ListFilter} label="Filtra per linea" value={line} onChange={setLine}>
                 <option>Tutte le linee</option>
                 {lines.map((item) => (
                   <option key={item}>{item}</option>
                 ))}
               </SelectBox>
 
-              <SelectBox
-                icon={Info}
-                label="Filtra per stato"
-                value={status}
-                onChange={setStatus}
-              >
+              <SelectBox icon={Info} label="Filtra per stato" value={status} onChange={setStatus}>
                 <option>Tutti gli stati</option>
                 {statuses.map((item) => (
                   <option key={item}>{item}</option>
@@ -431,40 +404,25 @@ export default function App() {
           </div>
 
           <div className="grid gap-5 lg:grid-cols-3">
-            {lineStats.map((item) => {
+            {lineStats.map((item, index) => {
               const meta = lineMeta[item.line];
-
               return (
                 <div
                   key={item.line}
-                  className={classNames(
-                    "rounded-2xl border bg-gradient-to-r p-5 shadow-lg shadow-slate-200/70",
-                    meta.card
-                  )}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.08, duration: 0.35 }}
+                  className={classNames("rounded-2xl border bg-gradient-to-r p-5 shadow-lg shadow-slate-200/70", meta.card)}
                 >
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
-                      <div
-                        className={classNames(
-                          "flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-lg",
-                          meta.icon
-                        )}
-                      >
+                      <div className={classNames("flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-lg", meta.icon)}>
                         <Factory className="h-8 w-8" />
                       </div>
-
                       <div>
-                        <h2
-                          className={classNames(
-                            "text-2xl font-black",
-                            meta.text
-                          )}
-                        >
-                          {item.line}
-                        </h2>
+                        <h2 className={classNames("text-2xl font-black", meta.text)}>{item.line}</h2>
                         <p className="mt-2 text-sm font-bold text-slate-600">
-                          {item.total}{" "}
-                          {item.total === 1 ? "macchina" : "macchine"}
+                          {item.total} {item.total === 1 ? "macchina" : "macchine"}
                         </p>
                       </div>
                     </div>
@@ -484,52 +442,38 @@ export default function App() {
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-lg shadow-slate-200/60">
               <div className="flex items-center gap-3">
                 <Gauge className="h-5 w-5 text-blue-600" />
-                <span className="text-sm font-bold text-slate-500">
-                  Totale macchine
-                </span>
+                <span className="text-sm font-bold text-slate-500">Totale macchine</span>
               </div>
-              <p className="mt-3 text-3xl font-black text-slate-950">
-                {totals.machines}
-              </p>
+              <p className="mt-3 text-3xl font-black text-slate-950">{totals.machines}</p>
             </div>
-
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-lg shadow-slate-200/60">
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                <span className="text-sm font-bold text-slate-500">
-                  Completate
-                </span>
+                <span className="text-sm font-bold text-slate-500">Completate</span>
               </div>
-              <p className="mt-3 text-3xl font-black text-slate-950">
-                {totals.completed}
-              </p>
+              <p className="mt-3 text-3xl font-black text-slate-950">{totals.completed}</p>
             </div>
-
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-lg shadow-slate-200/60">
               <div className="flex items-center gap-3">
                 <Clock3 className="h-5 w-5 text-amber-600" />
-                <span className="text-sm font-bold text-slate-500">
-                  In corso
-                </span>
+                <span className="text-sm font-bold text-slate-500">In corso</span>
               </div>
-              <p className="mt-3 text-3xl font-black text-slate-950">
-                {totals.inProgress}
-              </p>
+              <p className="mt-3 text-3xl font-black text-slate-950">{totals.inProgress}</p>
             </div>
           </div>
 
           <div
             id="machines"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35 }}
             className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-200/70"
           >
             <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-5">
               <div className="flex items-center gap-3">
                 <Activity className="h-5 w-5 text-slate-600" />
-                <h2 className="text-xl font-black text-slate-950">
-                  Elenco macchine
-                </h2>
+                <h2 className="text-xl font-black text-slate-950">Elenco macchine</h2>
               </div>
-
               <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">
                 {filteredMachines.length} risultati
               </span>
@@ -548,18 +492,11 @@ export default function App() {
                   <col className="w-[8%]" />
                   <col className="w-[8%]" />
                 </colgroup>
-
                 <thead className="bg-slate-50">
                   <tr>
                     {columns.map((column) => (
-                      <th
-                        key={column.key}
-                        className="px-2 py-3 text-xs font-black leading-tight text-slate-500"
-                      >
-                        <button
-                          onClick={() => handleSort(column.key)}
-                          className="inline-flex max-w-full items-center gap-1 truncate text-left transition hover:text-blue-700"
-                        >
+                      <th key={column.key} className="px-2 py-3 text-xs font-black leading-tight text-slate-500">
+                        <button onClick={() => handleSort(column.key)} className="inline-flex max-w-full items-center gap-1 truncate text-left transition hover:text-blue-700">
                           {column.label}
                           <ArrowUpDown className="h-3.5 w-3.5 shrink-0 text-slate-300" />
                         </button>
@@ -567,71 +504,36 @@ export default function App() {
                     ))}
                   </tr>
                 </thead>
-
                 <tbody className="divide-y divide-slate-100">
                   {filteredMachines.map((machine) => {
                     const meta = lineMeta[machine.line];
-
                     return (
-                      <tr
-                        key={`${machine.line}-${machine.serial}`}
-                        className="transition hover:bg-slate-50/80"
-                      >
+                      <tr key={`${machine.line}-${machine.serial}`} className="transition hover:bg-slate-50/80">
                         <td className="px-2 py-4 align-top">
-                          <span
-                            className={classNames(
-                              "inline-flex rounded-lg px-2.5 py-1 text-xs font-black",
-                              meta.chip
-                            )}
-                          >
-                            {machine.line}
-                          </span>
+                          <span className={classNames("inline-flex rounded-lg px-2.5 py-1 text-xs font-black", meta.chip)}>{machine.line}</span>
                         </td>
-
                         <td className="px-2 py-4 align-top text-sm leading-snug break-words">
-                          <div className="font-black text-slate-950">
-                            {machine.name}
-                          </div>
-
+                          <div className="font-black text-slate-950">{machine.name}</div>
                           <div className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-slate-400">
                             <Flag country={machine.country} />
                             <span>{machine.customerName}</span>
                           </div>
                         </td>
-
-                        <td className="px-2 py-4 align-top text-sm font-semibold text-slate-700 tabular-nums break-words">
-                          {machine.serial}
-                        </td>
-
+                        <td className="px-2 py-4 align-top text-sm font-semibold text-slate-700 tabular-nums break-words">{machine.serial}</td>
                         <td className="px-2 py-4 align-top">
                           <span
                             className={classNames(
                               "inline-flex rounded-lg border px-2.5 py-1 text-xs font-black",
-                              machine.type === "Tubo"
-                                ? "border-red-600 bg-red-600 text-white"
-                                : "border-red-600 bg-white text-red-700"
+                              machine.type === "Tubo" ? "border-red-600 bg-red-600 text-white" : "border-red-600 bg-white text-red-700"
                             )}
                           >
                             {machine.type}
                           </span>
                         </td>
-
-                        <td className="px-2 py-4 align-top text-sm font-semibold text-slate-800 tabular-nums break-words">
-                          {machine.bon}
-                        </td>
-
-                        <td className="px-2 py-4 align-top text-sm font-semibold text-slate-800 tabular-nums break-words">
-                          {machine.bSuite}
-                        </td>
-
-                        <td className="px-2 py-4 align-top text-sm font-semibold text-slate-800 tabular-nums break-words">
-                          {machine.plc}
-                        </td>
-
-                        <td className="px-2 py-4 align-top text-sm font-semibold text-slate-800 tabular-nums break-words">
-                          {machine.wrt}
-                        </td>
-
+                        <td className="px-2 py-4 align-top text-sm font-semibold text-slate-800 tabular-nums break-words">{machine.bon}</td>
+                        <td className="px-2 py-4 align-top text-sm font-semibold text-slate-800 tabular-nums break-words">{machine.bSuite}</td>
+                        <td className="px-2 py-4 align-top text-sm font-semibold text-slate-800 tabular-nums break-words">{machine.plc}</td>
+                        <td className="px-2 py-4 align-top text-sm font-semibold text-slate-800 tabular-nums break-words">{machine.wrt}</td>
                         <td className="px-2 py-4 align-top">
                           <StatusBadge status={machine.status} />
                         </td>
